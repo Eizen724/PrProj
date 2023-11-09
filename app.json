@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "ObjectDetectionApp",
-    "slug": "ObjectDetectionApp",
+    "slug": "test",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -21,10 +21,17 @@
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "package": "com.eizen.ObjectDetectionApp"
     },
     "web": {
       "favicon": "./assets/favicon.png"
-    }
+    },
+    "extra": {
+      "eas": {
+        "projectId": "1ceb5fe8-ad41-41cc-860b-7d0bcd3779e8"
+      }
+    },
+    "owner": "eizen724"
   }
 }
