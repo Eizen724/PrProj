@@ -35,7 +35,7 @@ const QRCodeScanner = () => {
   }
 
   const handleExternalLink = () => {
-    Linking.openURL('https://colab.research.google.com/drive/1O73d1UrJUSuSvhT2cUfPgGFTvk3A6-im?usp=sharing');
+    Linking.openURL('https://colab.research.google.com/github/Eizen724/PrProj/blob/main/PR_PROJ.ipynb');
   };
 
   return (
