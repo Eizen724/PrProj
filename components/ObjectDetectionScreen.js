@@ -4,14 +4,24 @@ import { Camera } from "expo-camera";
 import axios from "axios";
 import { useSearchParams } from "react-router-native";
 
+/**
+ * ObjectDetectionScreen component.
+ * This component displays a camera view and detects objects in the camera frames.
+ */
 const ObjectDetectionScreen = () => {
-  const [cameraRef, setCameraRef] = useState(null);
-  const [hasPermission, setHasPermission] = useState(null);
-  const [detectedObjects, setDetectedObjects] = useState([]);
-  const [isCameraReady, setIsCameraReady] = useState(false);
-  const [searchParams] = useSearchParams();
-  const ApiUrl = searchParams.get("url");
-  const detectionInterval = 5000;
+  // State variables
+  const [cameraRef, setCameraRef] = useState(null); // Reference to the camera component
+  const [hasPermission, setHasPermission] = useState(null); // Camera permission status
+  const [detectedObjects, setDetectedObjects] = useState([]); // Array of detected objects
+  const [isCameraReady, setIsCameraReady] = useState(false); // Flag indicating if the camera is ready
+  const [searchParams] = useSearchParams(); // Search parameters
+  const [cpt, setCpt] = useState(0); // Counter
+  const ApiUrl = searchParams.get("url"); // API URL
+  const detectionInterval = 5000; // Interval for taking pictures
+
+  /**
+   * Request camera permission when the component mounts.
+   */
   useEffect(() => {
     (async () => {
       const { status } = await Camera.requestCameraPermissionsAsync();
@@ -19,41 +29,62 @@ const ObjectDetectionScreen = () => {
     })();
   }, []);
 
-  const takePicture = async () => {
-    if (isCameraReady && cameraRef && hasPermission) {
-      try {
-        const options = { quality: 0.5, base64: true };
-        const { uri } = await cameraRef.takePictureAsync(options);
+/**
+ * Takes a picture using the camera and sends it for object detection.
+ * @returns {Promise<void>} A Promise that resolves when the picture is taken and sent for detection.
+ */
+const takePicture = async () => {
+  // Increment the counter
+  setCpt(cpt + 1);
 
-        const formData = new FormData();
-        formData.append("image", {
-          uri,
-          name: "image.jpg",
-          type: "image/jpeg",
+  // Check if the camera is ready, cameraRef is available, and hasPermission is granted
+  if (isCameraReady && cameraRef && hasPermission) {
+    try {
+      // Set the options for the picture
+      const options = { quality: 0.5, base64: true };
+
+      // Take the picture using the cameraRef
+      const { uri } = await cameraRef.takePictureAsync(options);
+
+      // Create a FormData object and append the picture to it
+      const formData = new FormData();
+      formData.append("image", {
+        uri,
+        name: "image.jpg",
+        type: "image/jpeg",
+      });
+
+      try {
+        // Send the picture for detection using axios post request
+        const response = await axios.post(`${ApiUrl}/detect`, formData, {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
         });
 
-        try {
-          const response = await axios.post(`${ApiUrl}/detect`, formData, {
-            headers: {
-              "Content-Type": "multipart/form-data",
-            },
-          });
-          const detectedObjects = response.data.image_with_objects;
-          setDetectedObjects(detectedObjects);
-        } catch (error) {
-          console.error("Error sending frame for detection:", error);
-        }
+        // Get the detected objects from the response and set them
+        const detectedObjects = response.data.image_with_objects;
+        setDetectedObjects(detectedObjects);
       } catch (error) {
-        console.error("Error taking picture:", error);
+        console.error("Error sending frame for detection:", error);
       }
+    } catch (error) {
+      console.error("Error taking picture:", error);
     }
-  };
+  }
+};
 
+  /**
+   * Handle camera readiness and take a picture when the camera is ready.
+   */
   const handleCameraReady = () => {
     setIsCameraReady(true);
     takePicture();
   };
 
+  /**
+   * Take pictures at regular intervals for object detection.
+   */
   useEffect(() => {
     const intervalId = setInterval(() => {
       takePicture();
@@ -64,10 +95,9 @@ const ObjectDetectionScreen = () => {
     };
   }, [isCameraReady, hasPermission]);
 
-  const saveToGallery = async () => {
-  
-  };
-
+  /**
+   * Render the ObjectDetectionScreen component.
+   */
   return (
     <View style={styles.container}>
       <View style={styles.detectedObjects}>
@@ -92,9 +122,6 @@ const ObjectDetectionScreen = () => {
             ref={(ref) => setCameraRef(ref)}
             onCameraReady={handleCameraReady}
           />
-          <TouchableOpacity style={styles.captureButton} onPress={saveToGallery}>
-            <Text style={styles.captureButtonText}>Capture & Save</Text>
-          </TouchableOpacity>
         </View>
       )}
     </View>

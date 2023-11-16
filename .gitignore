@@ -2,7 +2,7 @@
 
 # dependencies
 node_modules/
-
+sauvegarde.txt
 # Expo
 .expo/
 dist/
